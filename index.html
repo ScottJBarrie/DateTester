@@ -58,6 +58,46 @@
     font-weight:600;padding:2px 0;border-bottom:1px solid rgba(201,162,39,.4);
   }
   .reference-link:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+  .links{display:flex;gap:16px;align-items:baseline}
+
+  .jump{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .jump input{
+    width:76px;flex:none;font-family:"Fraunces",Georgia,serif;font-size:1.55rem;
+    font-weight:600;text-align:center;color:var(--brass);background:var(--slate);
+    border:1px solid rgba(201,162,39,.45);border-radius:10px;padding:9px 0;
+  }
+  .jump input::placeholder{color:rgba(242,237,228,.22)}
+  .jump input:focus{outline:2px solid var(--brass);outline-offset:2px}
+  .jump-label{font-size:.72rem;opacity:.5;line-height:1.4}
+
+  .room-tabs{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;margin-bottom:14px}
+  .room-tabs button{
+    font-family:"Fraunces",Georgia,serif;font-size:1.05rem;font-weight:600;
+    color:var(--bone);background:var(--slate);border:1px solid transparent;
+    border-radius:9px;padding:9px 0;cursor:pointer;grid-column:span 3;opacity:.45;
+    transition:opacity .12s ease,color .12s ease;
+  }
+  .room-tabs button:nth-child(n+5){grid-column:span 4}
+  .room-tabs button.on{opacity:1;border-color:var(--brass);color:var(--brass)}
+  .room-tabs button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+  .palace-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .room-shape{
+    font-size:.78rem;opacity:.55;line-height:1.45;padding-bottom:12px;
+    border-bottom:1px solid var(--hairline);margin-bottom:14px;
+  }
+  .people-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
+  .person{text-align:center;padding:5px;border-radius:10px;border:1px solid transparent}
+  .person.found{border-color:var(--brass);background:rgba(201,162,39,.09)}
+  .person img{
+    display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:8px;
+    background:var(--slate);border:1px solid var(--hairline);
+  }
+  .person .num{
+    font-family:"Fraunces",Georgia,serif;font-size:1rem;font-weight:600;
+    color:var(--brass);margin-top:6px;
+  }
+  .person .who{font-size:.66rem;opacity:.6;line-height:1.3;margin-top:1px}
 
   .modes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .modes button{
@@ -200,7 +240,10 @@
 
   <header class="masthead">
     <span class="wordmark">Almanac</span>
-    <button type="button" class="reference-link" id="referenceLink">The codes</button>
+    <span class="links">
+      <button type="button" class="reference-link" id="palaceLink">Palace</button>
+      <button type="button" class="reference-link" id="referenceLink">Codes</button>
+    </span>
   </header>
 
   <nav class="modes" id="modes">
@@ -236,6 +279,23 @@
     <p class="sub" id="sheetDay"></p>
     <div class="steps" id="steps"></div>
     <button class="close" id="close">Back to the date</button>
+  </div>
+</div>
+
+<div class="sheet" id="palace">
+  <div class="sheet-inner">
+    <h2>The Palace</h2>
+    <p class="sub" id="palaceRoom"></p>
+
+    <div class="jump">
+      <input id="jumpInput" type="text" inputmode="numeric" maxlength="2"
+             placeholder="00" autocomplete="off" aria-label="Go to a number">
+      <span class="jump-label">Type a number and it will open its room</span>
+    </div>
+
+    <div class="room-tabs" id="roomTabs"></div>
+    <div class="palace-body" id="palaceBody"></div>
+    <button class="close" id="palaceClose">Back to practice</button>
   </div>
 </div>
 
@@ -444,6 +504,28 @@ const MONTH_HINTS = [
     return b;
   });
 
+  const palace = {
+    sheet: document.getElementById('palace'),
+    room: document.getElementById('palaceRoom'),
+    tabs: document.getElementById('roomTabs'),
+    body: document.getElementById('palaceBody'),
+    jump: document.getElementById('jumpInput'),
+    close: document.getElementById('palaceClose'),
+    link: document.getElementById('palaceLink')
+  };
+
+  /* Which years live in which room, worked out once */
+  const YEARS_BY_ROOM = [[],[],[],[],[],[],[]];
+  for(let n = 0; n < 100; n++) YEARS_BY_ROOM[yearCode(n)].push(n);
+
+  const roomTabs = [0,1,2,3,4,5,6].map(function(c){
+    const b = document.createElement('button');
+    b.textContent = c;
+    b.addEventListener('click', function(){ showRoom(c); });
+    palace.tabs.appendChild(b);
+    return b;
+  });
+
   let audio = null;
   function chime(){
     try{
@@ -632,6 +714,67 @@ const MONTH_HINTS = [
     el.steps.appendChild(row(0, 'Reading the total', 'Cast out the sevens. 0 is Saturday, 1 is Sunday, and on.', true));
   }
 
+  /* The palace, one room at a time */
+  function showRoom(code, findYy){
+    roomTabs.forEach(function(b, i){ b.classList.toggle('on', i === code); });
+    const place = ROOMS[code] || {};
+    palace.room.textContent = code + ', ' + (place.room || 'not named yet');
+    palace.body.innerHTML = '';
+
+    const note = document.createElement('div');
+    note.className = 'room-shape';
+    note.textContent = (place.shape ? place.shape + '. ' : '') +
+      YEARS_BY_ROOM[code].length + ' numbers live here.';
+    palace.body.appendChild(note);
+
+    const grid = document.createElement('div');
+    grid.className = 'people-grid';
+    YEARS_BY_ROOM[code].forEach(function(n){
+      const cell = document.createElement('div');
+      cell.className = 'person' + (n === findYy ? ' found' : '');
+
+      const img = document.createElement('img');
+      img.loading = 'lazy';
+      img.alt = PEOPLE[pad(n)] || 'Character for ' + pad(n);
+      setPicture(img, n, function(ok){ if(!ok) img.style.visibility = 'hidden'; });
+
+      const num = document.createElement('div');
+      num.className = 'num';
+      num.textContent = pad(n);
+
+      const who = document.createElement('div');
+      who.className = 'who';
+      who.textContent = PEOPLE[pad(n)] || 'Not named yet';
+
+      cell.appendChild(img);
+      cell.appendChild(num);
+      cell.appendChild(who);
+      grid.appendChild(cell);
+    });
+    palace.body.appendChild(grid);
+    palace.body.scrollTop = 0;
+
+    if(findYy !== undefined){
+      const target = grid.children[YEARS_BY_ROOM[code].indexOf(findYy)];
+      if(target && target.scrollIntoView) target.scrollIntoView({ block: 'center' });
+    }
+  }
+
+  function jumpToNumber(value){
+    const digits = String(value).replace(/\D/g, '');
+    if(!digits.length) return;
+    const n = parseInt(digits.length === 1 ? '0' + digits : digits, 10);
+    showRoom(yearCode(n), n);
+  }
+
+  function openPalace(){
+    clearTimeout(advance);
+    palace.jump.value = '';
+    showRoom(0);
+    palace.sheet.classList.add('show');
+    if(locked) el.next.classList.add('show');
+  }
+
   function openReference(){
     clearTimeout(advance);
     buildReference();
@@ -648,7 +791,10 @@ const MONTH_HINTS = [
     el.next.classList.add('show');
   }
 
-  function closeSheet(){ el.sheet.classList.remove('show'); }
+  function closeSheet(){
+    el.sheet.classList.remove('show');
+    palace.sheet.classList.remove('show');
+  }
 
   function deal(){
     closeSheet();
@@ -804,6 +950,21 @@ const MONTH_HINTS = [
   el.referenceLink.addEventListener('click', openReference);
   el.workingLink.addEventListener('click', openSheet);
   el.close.addEventListener('click', closeSheet);
+
+  palace.link.addEventListener('click', openPalace);
+  palace.close.addEventListener('click', closeSheet);
+  palace.jump.addEventListener('input', function(){
+    const digits = palace.jump.value.replace(/\D/g, '');
+    if(palace.jump.value !== digits) palace.jump.value = digits;
+    if(digits.length === 2) jumpToNumber(digits);
+  });
+  palace.jump.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){
+      jumpToNumber(palace.jump.value);
+      palace.jump.blur();
+    }
+  });
+
   setMode('dates');
 })();
 </script>

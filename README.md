@@ -21,6 +21,10 @@ character card appears with the room, so the palace gets rehearsed as you go.
 **The codes**, top right, is a reference sheet listing every month grouped by
 its code, all seven rooms, and the century and leap year rules.
 
+**Palace**, also top right, shows the plan of each room with every character
+in it. Type a number into the box and it opens that number's room with the
+card picked out, so you never have to work out where something lives.
+
 ## How the working panel reads
 
 Each date breaks into four codes that add together, casting out sevens as
