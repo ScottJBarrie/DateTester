@@ -198,18 +198,89 @@
 
 /* The seven areas, one for each year code. */
 const ROOMS = {
-  0: { room: '',       shape: '' },
-  1: { room: '',       shape: '' },
-  2: { room: '',       shape: '' },
-  3: { room: 'Study',  shape: 'Door with a big comedy moustache' },
-  4: { room: '',       shape: '' },
-  5: { room: '',       shape: '' },
-  6: { room: '',       shape: '' }
+  0: { room: 'The Garden',            shape: 'Football' },
+  1: { room: "Scott's Bedroom",       shape: 'Golf pin with a flag on it' },
+  2: { room: "Mam and Dad's Bedroom", shape: 'Ice sculpture of a swan' },
+  3: { room: 'The Study',             shape: 'Huge comedy moustache on the door' },
+  4: { room: 'The Hall and Stairs',   shape: 'Sailboat ornament' },
+  5: { room: '',                      shape: '' },
+  6: { room: '',                      shape: '' }
 };
 
-/* The people, by two digit year. Add them as you go. */
+/* The people, by two digit year. Add them as you go.
+   Keep the quote marks around the number, so '06' and not 6. */
 const PEOPLE = {
-  25: 'Billy Elliot'
+  /* 0, The Garden */
+  '00': 'Ozzy Osborne',
+  '06': 'OJ Simpson',
+  '17': 'Al Gore',
+  '23': 'Billy Connelly',
+  '28': 'Benny Hill',
+  '34': 'Charles Darwin',
+  '45': 'Dick Emery',
+  '51': 'Edgar Alan Poe',
+  '56': 'Edwin Starr',
+  '62': 'Sara Bareilles',
+  '73': 'Gary Coleman',
+  '79': 'Gary Newman',
+  '84': 'Hugh Dennis',
+  '90': 'Nero',
+
+  /* 1, Scott's Bedroom */
+  '01': 'Olly Alcock',
+  '07': 'Olly Green',
+  '12': 'Alice Bondi',
+  '18': 'Adolf Hitler',
+  '29': 'Bill Nighy',
+  '35': 'Clint Eastwood',
+  '40': 'Donny Osmond',
+  '46': 'Dan Sylvester',
+  '57': 'Ed Gein',
+  '63': 'Sean Connery',
+  '68': 'Stephen Hawkins',
+  '74': 'Gary Davis',
+  '85': 'Harry Enfield',
+  '91': 'Neil Armstrong',
+  '96': 'Nicole Scherzinger',
+
+  /* 2, Mam and Dad's Bedroom */
+  '02': 'Orlando Bloom',
+  '13': 'Al Capone',
+  '19': 'Admiral Nelson',
+  '24': 'Bruce Dickinson',
+  '30': 'Clive Owen',
+  '41': 'Dan Akroyd',
+  '47': 'Danny Glover',
+  '52': 'Eva Braun',
+  '58': 'Ethan Hawke',
+  '69': 'Sam Neil',
+  '75': 'Gloria Estefan',
+  '80': 'Hall and Oates',
+  '86': 'Horace Skiing',
+  '97': 'Noel Gallagher',
+
+  /* 3, The Study */
+  '03': 'Oliver Cromwell',
+  '08': 'Oliver Hardy',
+  '14': 'Admiral Donitz',
+  '25': 'Billy Elliot',
+  '31': 'Chris Angel',
+  '36': 'Charlie Sheen',
+  '42': 'Derren Brown',
+  '53': 'Eric Clapton',
+  '59': 'Ed Norton',
+  '64': 'Simon Doyle',
+  '70': 'Gary Oldman',
+  '81': 'Hank Azaria',
+  '87': 'Harry Green',
+  '92': 'Napoleon Bonaparte',
+  '98': 'Nick Hewer',
+
+  /* 4, The Hall and Stairs */
+  '09': 'Oliver North',
+  '15': 'Albert Einstein',
+  '20': 'Barrack Obama',
+  '26': 'Bart Simpson'
 };
 
 /* Month prompts. These are placeholders, swap them for your own. */
@@ -334,7 +405,7 @@ const MONTH_HINTS = [
     const img = document.createElement('img');
     let attempt = 0;
     img.className = 'portrait';
-    img.alt = PEOPLE[yy] || 'Character for ' + pad(yy);
+    img.alt = PEOPLE[pad(yy)] || 'Character for ' + pad(yy);
     img.addEventListener('load', function(){ img.classList.add('loaded'); });
     img.addEventListener('error', function(){
       attempt++;
@@ -374,10 +445,10 @@ const MONTH_HINTS = [
     el.steps.appendChild(row(w.monthCode, w.month, w.monthHint));
 
     const place = ROOMS[w.yearCode] || {};
-    const who = PEOPLE[w.yy];
+    const who = PEOPLE[pad(w.yy)];
     let hint = who ? who + ' is your ' + pad(w.yy) : 'Year ' + pad(w.yy) + ', name not added yet';
     if(place.room){
-      hint += '. He is in the ' + place.room;
+      hint += '. ' + place.room;
       if(place.shape) hint += ', ' + place.shape.toLowerCase();
       hint += ', which is ' + w.yearCode + '.';
     } else {
