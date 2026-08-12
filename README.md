@@ -9,6 +9,18 @@ Live at https://scottjbarrie.github.io/DateTester/
 There is nothing to install and no build step. Opening `index.html` in a
 browser works just as well.
 
+## Two ways to practise
+
+**Dates** gives you a full date and asks for the day. After answering, Show
+working breaks the calculation into its four codes.
+
+**Codes** drills the two lookups that gate every calculation, month to code
+and year to code, one at a time against the clock. Get a year right and the
+character card appears with the room, so the palace gets rehearsed as you go.
+
+**The codes**, top right, is a reference sheet listing every month grouped by
+its code, all seven rooms, and the century and leap year rules.
+
 ## How the working panel reads
 
 Each date breaks into four codes that add together, casting out sevens as

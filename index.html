@@ -52,6 +52,23 @@
   .wordmark{font-size:.7rem;letter-spacing:.42em;text-transform:uppercase;color:var(--brass);font-weight:600}
   .tagline{font-size:.68rem;letter-spacing:.06em;opacity:.45}
 
+  .reference-link{
+    background:none;border:0;font-family:inherit;cursor:pointer;
+    color:var(--brass);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+    font-weight:600;padding:2px 0;border-bottom:1px solid rgba(201,162,39,.4);
+  }
+  .reference-link:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .modes button{
+    font-family:inherit;font-size:.66rem;font-weight:600;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--bone);background:var(--slate);
+    border:1px solid transparent;border-radius:9px;padding:11px 6px;cursor:pointer;
+    opacity:.45;transition:opacity .12s ease,color .12s ease;
+  }
+  .modes button.on{opacity:1;border-color:var(--brass);color:var(--brass)}
+  .modes button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
   .scores{display:flex;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)}
   .score{flex:1;padding:9px 0;text-align:center;border-right:1px solid var(--hairline)}
   .score:last-child{border-right:0}
@@ -86,7 +103,14 @@
   }
   .working-link.show{display:block}
 
-  .days{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .quiz-card{
+    display:none;width:72px;height:108px;border-radius:8px;object-fit:cover;
+    border:1px solid rgba(201,162,39,.45);margin-top:6px;
+  }
+  .quiz-card.show{display:block}
+
+  .days{display:none;grid-template-columns:1fr 1fr;gap:8px}
+  .days.show{display:grid}
   .days button{
     font-family:inherit;font-size:.96rem;font-weight:500;color:var(--bone);
     background:var(--slate);border:1px solid transparent;border-radius:11px;
@@ -98,6 +122,20 @@
   .days button:active{background:#2b3053}
   .days button.correct{background:var(--verdigris);color:var(--midnight);font-weight:600}
   .days button.incorrect{background:var(--rust);color:var(--bone)}
+
+  .codes{display:none;grid-template-columns:repeat(12,1fr);gap:8px}
+  .codes.show{display:grid}
+  .codes button{
+    font-family:"Fraunces",Georgia,serif;font-size:1.35rem;font-weight:600;color:var(--bone);
+    background:var(--slate);border:1px solid transparent;border-radius:11px;
+    padding:14px 0;cursor:pointer;grid-column:span 3;
+    transition:background .12s ease,color .12s ease;
+  }
+  .codes button:nth-child(n+5){grid-column:span 4}
+  .codes button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .codes button:active{background:#2b3053}
+  .codes button.correct{background:var(--verdigris);color:var(--midnight)}
+  .codes button.incorrect{background:var(--rust);color:var(--bone)}
 
   .next{
     display:none;width:100%;font-family:inherit;font-size:.78rem;font-weight:600;
@@ -125,6 +163,11 @@
     color:var(--brass);margin-bottom:18px;
   }
   .steps{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .steps .group{
+    font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--brass);padding:20px 0 7px;border-bottom:1px solid var(--hairline);
+  }
+  .steps .group:first-child{padding-top:0}
   .step{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--hairline);align-items:flex-start}
   .step .code{
     font-family:"Fraunces",Georgia,serif;font-size:1.5rem;font-weight:600;
@@ -157,8 +200,13 @@
 
   <header class="masthead">
     <span class="wordmark">Almanac</span>
-    <span class="tagline">1900 to 2099</span>
+    <button type="button" class="reference-link" id="referenceLink">The codes</button>
   </header>
+
+  <nav class="modes" id="modes">
+    <button type="button" data-mode="dates">Dates</button>
+    <button type="button" data-mode="codes">Codes</button>
+  </nav>
 
   <section class="scores">
     <div class="score"><b id="streak">0</b><span>Streak</span></div>
@@ -171,11 +219,13 @@
     <div class="verdict" id="verdict">
       <span class="answer" id="answer"></span>
       <span class="note" id="note">Which day was it?</span>
+      <img class="quiz-card" id="quizCard" alt="">
       <button class="working-link" id="workingLink">Show working</button>
     </div>
   </main>
 
   <div class="days" id="days"></div>
+  <div class="codes" id="codes"></div>
   <button class="next" id="next">Next date</button>
 
 </div>
@@ -348,6 +398,7 @@ const MONTH_HINTS = [
   const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const MONTH_CODES = [1,4,4,0,2,5,0,3,6,1,4,6];
+  function yearCode(yy){ return (yy + Math.floor(yy / 4)) % 7; }
   const MIN = Date.UTC(1900,0,1);
   const MAX = Date.UTC(2099,11,31);
 
@@ -357,6 +408,10 @@ const MONTH_HINTS = [
     answer: document.getElementById('answer'),
     note: document.getElementById('note'),
     days: document.getElementById('days'),
+    codes: document.getElementById('codes'),
+    modes: document.getElementById('modes'),
+    quizCard: document.getElementById('quizCard'),
+    referenceLink: document.getElementById('referenceLink'),
     next: document.getElementById('next'),
     streak: document.getElementById('streak'),
     tally: document.getElementById('tally'),
@@ -371,12 +426,21 @@ const MONTH_HINTS = [
 
   let current = null, locked = false, started = 0, ticker = null, advance = null;
   let streak = 0, correct = 0, total = 0;
+  let mode = 'dates', quiz = null;
 
   const buttons = DAYS.map(function(name, i){
     const b = document.createElement('button');
     b.textContent = name;
     b.addEventListener('click', function(){ answer(i, b); });
     el.days.appendChild(b);
+    return b;
+  });
+
+  const codeButtons = [0,1,2,3,4,5,6].map(function(n){
+    const b = document.createElement('button');
+    b.textContent = n;
+    b.addEventListener('click', function(){ answerCode(n, b); });
+    el.codes.appendChild(b);
     return b;
   });
 
@@ -422,18 +486,18 @@ const MONTH_HINTS = [
     const dayCode = day % 7;
     const sevens = Math.floor(day / 7);
     const monthCode = MONTH_CODES[monthIndex];
-    const yearCode = (yy + Math.floor(yy / 4)) % 7;
+    const yCode = yearCode(yy);
     const centuryCode = year < 2000 ? 0 : 6;
     const leap = isLeap(year) && monthIndex < 2 ? -1 : 0;
 
-    const sum = dayCode + monthCode + yearCode + centuryCode + leap;
+    const sum = dayCode + monthCode + yCode + centuryCode + leap;
     const finalCode = ((sum % 7) + 7) % 7;
 
     return {
       day: day, month: MONTHS[monthIndex], year: year, yy: yy,
       dayCode: dayCode, sevens: sevens,
       monthCode: monthCode, monthHint: MONTH_HINTS[monthIndex],
-      yearCode: yearCode, centuryCode: centuryCode,
+      yearCode: yCode, centuryCode: centuryCode,
       leap: leap, sum: sum, finalCode: finalCode
     };
   }
@@ -443,21 +507,28 @@ const MONTH_HINTS = [
      can just be dropped in as whichever it happens to be. */
   const PICTURE_TYPES = ['png','jpg','jpeg'];
 
-  function addPortrait(step, yy){
-    const img = document.createElement('img');
+  function setPicture(img, yy, done){
     let attempt = 0;
-    img.className = 'portrait';
-    img.alt = PEOPLE[pad(yy)] || 'Character for ' + pad(yy);
-    img.addEventListener('load', function(){ img.classList.add('loaded'); });
-    img.addEventListener('error', function(){
+    img.onload = function(){ if(done) done(true); };
+    img.onerror = function(){
       attempt++;
       if(attempt < PICTURE_TYPES.length){
         img.src = 'people/' + pad(yy) + '.' + PICTURE_TYPES[attempt];
       } else {
-        img.remove();
+        img.onerror = null;
+        if(done) done(false);
       }
-    });
+    };
     img.src = 'people/' + pad(yy) + '.' + PICTURE_TYPES[0];
+  }
+
+  function addPortrait(step, yy){
+    const img = document.createElement('img');
+    img.className = 'portrait';
+    img.alt = PEOPLE[pad(yy)] || 'Character for ' + pad(yy);
+    setPicture(img, yy, function(ok){
+      if(ok) img.classList.add('loaded'); else img.remove();
+    });
     step.appendChild(img);
   }
 
@@ -516,9 +587,63 @@ const MONTH_HINTS = [
     ));
   }
 
+  function groupHeading(text){
+    const div = document.createElement('div');
+    div.className = 'group';
+    div.textContent = text;
+    return div;
+  }
+
+  function listNames(names){
+    if(names.length === 1) return names[0];
+    return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
+  }
+
+  /* The reference sheet, every code in one place */
+  function buildReference(){
+    el.sheetDate.textContent = 'The codes';
+    el.sheetDay.textContent = 'Reference';
+    el.steps.innerHTML = '';
+
+    const byCode = [[],[],[],[],[],[],[]];
+    MONTH_CODES.forEach(function(c, i){ byCode[c].push(i); });
+
+    el.steps.appendChild(groupHeading('Months'));
+    byCode.forEach(function(list, c){
+      if(!list.length) return;
+      el.steps.appendChild(row(
+        c,
+        listNames(list.map(function(i){ return MONTHS[i]; })),
+        list.map(function(i){ return MONTH_HINTS[i]; }).join('. ')
+      ));
+    });
+
+    el.steps.appendChild(groupHeading('Rooms'));
+    for(let c = 0; c < 7; c++){
+      const place = ROOMS[c] || {};
+      el.steps.appendChild(row(c, place.room || 'Not named yet', place.shape || ''));
+    }
+
+    el.steps.appendChild(groupHeading('The rest'));
+    el.steps.appendChild(row(0, 'The day of the month', 'Cast out the sevens and keep what is left'));
+    el.steps.appendChild(row(0, 'Dates in the 1900s', 'Nothing to add'));
+    el.steps.appendChild(row(6, 'Dates from 2000 on', 'Always add 6'));
+    el.steps.appendChild(row('-1', 'Leap year, January or February only', 'Take 1 off the total'));
+    el.steps.appendChild(row(0, 'Reading the total', 'Cast out the sevens. 0 is Saturday, 1 is Sunday, and on.', true));
+  }
+
+  function openReference(){
+    clearTimeout(advance);
+    buildReference();
+    el.close.textContent = 'Back to practice';
+    el.sheet.classList.add('show');
+    if(locked) el.next.classList.add('show');
+  }
+
   function openSheet(){
     clearTimeout(advance);
     buildSheet();
+    el.close.textContent = 'Back to the date';
     el.sheet.classList.add('show');
     el.next.classList.add('show');
   }
@@ -537,6 +662,7 @@ const MONTH_HINTS = [
     locked = false;
     el.next.classList.remove('show');
     el.workingLink.classList.remove('show');
+    el.quizCard.classList.remove('show');
     el.verdict.className = 'verdict';
     el.answer.textContent = '';
     el.note.textContent = 'Which day was it?';
@@ -583,10 +709,102 @@ const MONTH_HINTS = [
     }
   }
 
-  el.next.addEventListener('click', deal);
+  /* Codes practice, one lookup at a time */
+  function dealQuiz(){
+    closeSheet();
+    if(Math.random() < 0.35){
+      const m = Math.floor(Math.random() * 12);
+      quiz = { kind: 'month', code: MONTH_CODES[m], label: MONTHS[m], hint: MONTH_HINTS[m] };
+    } else {
+      const n = Math.floor(Math.random() * 100);
+      const place = ROOMS[yearCode(n)] || {};
+      let hint = PEOPLE[pad(n)] || 'Year ' + pad(n) + ', name not added yet';
+      if(place.room){
+        hint += ', ' + place.room;
+        if(place.shape) hint += ', ' + place.shape.toLowerCase();
+      }
+      quiz = { kind: 'year', code: yearCode(n), label: pad(n), hint: hint, yy: n };
+    }
+
+    el.date.innerHTML = '<span class="day-num">' + quiz.label + '</span>';
+    locked = false;
+    el.next.classList.remove('show');
+    el.workingLink.classList.remove('show');
+    el.quizCard.classList.remove('show');
+    el.verdict.className = 'verdict';
+    el.answer.textContent = '';
+    el.note.textContent = quiz.kind === 'month' ? 'Which code is this month?' : 'Which code is this year?';
+    codeButtons.forEach(function(b){ b.className = ''; b.disabled = false; });
+
+    started = Date.now();
+    clearInterval(ticker);
+    ticker = setInterval(tick, 100);
+    tick();
+  }
+
+  function answerCode(picked, button){
+    if(locked) return;
+    locked = true;
+    clearInterval(ticker);
+    const seconds = ((Date.now() - started) / 1000).toFixed(1);
+    const won = picked === quiz.code;
+
+    total++;
+    if(won){ correct++; streak++; } else { streak = 0; }
+    el.streak.textContent = streak;
+    el.tally.textContent = correct + '/' + total;
+    el.clock.textContent = seconds + 's';
+
+    codeButtons.forEach(function(b){ b.disabled = true; });
+    codeButtons[quiz.code].classList.add('correct');
+    if(!won) button.classList.add('incorrect');
+
+    el.verdict.className = 'verdict show ' + (won ? 'right' : 'wrong');
+    el.answer.textContent = quiz.code;
+    el.note.textContent = quiz.hint;
+
+    if(quiz.kind === 'year'){
+      el.quizCard.alt = PEOPLE[pad(quiz.yy)] || 'Character for ' + pad(quiz.yy);
+      setPicture(el.quizCard, quiz.yy, function(ok){
+        el.quizCard.classList.toggle('show', ok);
+      });
+    }
+
+    if(won){
+      chime();
+      advance = setTimeout(dealQuiz, quiz.kind === 'year' ? 2200 : 1500);
+    } else {
+      el.next.classList.add('show');
+    }
+  }
+
+  function setMode(next){
+    mode = next;
+    clearTimeout(advance);
+    closeSheet();
+    Array.prototype.forEach.call(el.modes.children, function(b){
+      b.classList.toggle('on', b.dataset.mode === next);
+    });
+    el.days.classList.toggle('show', next === 'dates');
+    el.codes.classList.toggle('show', next === 'codes');
+    el.next.textContent = next === 'dates' ? 'Next date' : 'Next question';
+    streak = 0; correct = 0; total = 0;
+    el.streak.textContent = '0';
+    el.tally.textContent = '0/0';
+    if(next === 'dates') deal(); else dealQuiz();
+  }
+
+  Array.prototype.forEach.call(el.modes.children, function(b){
+    b.addEventListener('click', function(){ setMode(b.dataset.mode); });
+  });
+
+  el.next.addEventListener('click', function(){
+    if(mode === 'dates') deal(); else dealQuiz();
+  });
+  el.referenceLink.addEventListener('click', openReference);
   el.workingLink.addEventListener('click', openSheet);
   el.close.addEventListener('click', closeSheet);
-  deal();
+  setMode('dates');
 })();
 </script>
 </body>
