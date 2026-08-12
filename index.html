@@ -48,71 +48,56 @@
     gap:14px;
   }
 
-  /* header */
   .masthead{display:flex;align-items:baseline;justify-content:space-between}
-  .wordmark{
-    font-size:.7rem;letter-spacing:.42em;text-transform:uppercase;
-    color:var(--brass);font-weight:600;
-  }
+  .wordmark{font-size:.7rem;letter-spacing:.42em;text-transform:uppercase;color:var(--brass);font-weight:600}
   .tagline{font-size:.68rem;letter-spacing:.06em;opacity:.45}
 
-  /* scoreboard */
-  .scores{
-    display:flex;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);
-  }
+  .scores{display:flex;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)}
   .score{flex:1;padding:9px 0;text-align:center;border-right:1px solid var(--hairline)}
   .score:last-child{border-right:0}
   .score b{display:block;font-size:1.05rem;font-weight:500;font-variant-numeric:tabular-nums}
   .score span{display:block;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;opacity:.45;margin-top:2px}
 
-  /* the date */
-  .stage{
-    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    text-align:center;min-height:0;
-  }
+  .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:0}
   .date{
-    font-family:"Fraunces","Georgia",serif;
-    font-weight:300;
-    font-size:clamp(2.1rem,10.5vw,3.3rem);
-    line-height:1.16;
-    letter-spacing:-.01em;
+    font-family:"Fraunces","Georgia",serif;font-weight:300;
+    font-size:clamp(2.1rem,10.5vw,3.3rem);line-height:1.16;letter-spacing:-.01em;
   }
   .date .day-num{font-weight:600}
-  .date .suffix{
-    font-size:.46em;vertical-align:.72em;color:var(--brass);
-    font-weight:600;margin-left:.02em;
-  }
-  .date .of{display:block;font-size:.38em;letter-spacing:.3em;text-transform:uppercase;
-    opacity:.4;font-family:"IBM Plex Sans",sans-serif;margin:.5em 0 .35em}
+  .date .suffix{font-size:.46em;vertical-align:.72em;color:var(--brass);font-weight:600;margin-left:.02em}
+  .date .of{display:block;font-size:.38em;letter-spacing:.3em;text-transform:uppercase;opacity:.4;
+    font-family:"IBM Plex Sans",sans-serif;margin:.5em 0 .35em}
 
-  .verdict{
-    margin-top:26px;min-height:74px;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:6px;
-  }
+  .verdict{margin-top:22px;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
   .verdict .answer{
-    font-family:"Fraunces",Georgia,serif;font-size:1.6rem;font-weight:600;
-    letter-spacing:.02em;opacity:0;transform:translateY(6px);
-    transition:opacity .18s ease,transform .18s ease;
+    font-family:"Fraunces",Georgia,serif;font-size:1.6rem;font-weight:600;letter-spacing:.02em;
+    opacity:0;transform:translateY(6px);transition:opacity .18s ease,transform .18s ease;
   }
   .verdict .note{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.45}
   .verdict.show .answer{opacity:1;transform:none}
   .verdict.right .answer{color:var(--verdigris)}
   .verdict.wrong .answer{color:var(--rust)}
 
-  /* day buttons */
+  .working-link{
+    display:none;background:none;border:0;font-family:inherit;cursor:pointer;
+    color:var(--brass);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+    font-weight:600;padding:8px 4px;margin-top:2px;
+    border-bottom:1px solid rgba(201,162,39,.4);
+  }
+  .working-link.show{display:block}
+
   .days{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .days button{
     font-family:inherit;font-size:.96rem;font-weight:500;color:var(--bone);
     background:var(--slate);border:1px solid transparent;border-radius:11px;
     padding:15px 6px;cursor:pointer;
-    transition:background .12s ease,color .12s ease,border-color .12s ease;
+    transition:background .12s ease,color .12s ease;
   }
   .days button:nth-child(7){grid-column:span 2}
   .days button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
   .days button:active{background:#2b3053}
   .days button.correct{background:var(--verdigris);color:var(--midnight);font-weight:600}
   .days button.incorrect{background:var(--rust);color:var(--bone)}
-  .days.locked button{cursor:default}
 
   .next{
     display:none;width:100%;font-family:inherit;font-size:.78rem;font-weight:600;
@@ -123,9 +108,48 @@
   .next.show{display:block}
   .next:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 
-  @media (prefers-reduced-motion:reduce){
-    *{transition:none !important}
+  /* working sheet */
+  .sheet{
+    position:fixed;inset:0;background:var(--midnight);z-index:10;
+    display:none;flex-direction:column;
+    padding:calc(env(safe-area-inset-top) + 22px) 20px calc(env(safe-area-inset-bottom) + 18px);
   }
+  .sheet.show{display:flex}
+  .sheet-inner{width:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;height:100%}
+  .sheet h2{
+    font-family:"Fraunces",Georgia,serif;font-weight:300;font-size:1.5rem;
+    text-align:center;margin-bottom:4px;
+  }
+  .sheet .sub{
+    text-align:center;font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--brass);margin-bottom:18px;
+  }
+  .steps{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .step{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--hairline);align-items:flex-start}
+  .step .code{
+    font-family:"Fraunces",Georgia,serif;font-size:1.5rem;font-weight:600;
+    min-width:38px;text-align:center;color:var(--brass);line-height:1.1;
+  }
+  .step .body{flex:1}
+  .step .head{font-size:.94rem;font-weight:500}
+  .step .hint{font-size:.78rem;opacity:.55;margin-top:3px;line-height:1.45}
+  .step .portrait{
+    width:88px;height:132px;flex:none;border-radius:10px;object-fit:cover;
+    background:var(--slate);border:1px solid rgba(201,162,39,.45);
+    opacity:0;transition:opacity .2s ease;
+  }
+  .step .portrait.loaded{opacity:1}
+  .step.total{border-bottom:0;padding-top:16px}
+  .step.total .code{color:var(--verdigris)}
+  .step.total .head{font-size:1rem;font-weight:600}
+  .sheet .close{
+    margin-top:14px;width:100%;font-family:inherit;font-size:.78rem;font-weight:600;
+    letter-spacing:.18em;text-transform:uppercase;background:var(--slate);color:var(--bone);
+    border:0;border-radius:11px;padding:15px;cursor:pointer;
+  }
+  .sheet .close:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none !important}}
 </style>
 </head>
 <body>
@@ -147,6 +171,7 @@
     <div class="verdict" id="verdict">
       <span class="answer" id="answer"></span>
       <span class="note" id="note">Which day was it?</span>
+      <button class="working-link" id="workingLink">Show working</button>
     </div>
   </main>
 
@@ -155,10 +180,61 @@
 
 </div>
 
+<div class="sheet" id="sheet">
+  <div class="sheet-inner">
+    <h2 id="sheetDate"></h2>
+    <p class="sub" id="sheetDay"></p>
+    <div class="steps" id="steps"></div>
+    <button class="close" id="close">Back to the date</button>
+  </div>
+</div>
+
 <script>
+/* ============================================================
+   YOUR PALACE
+   Edit the text inside the quote marks only.
+   Leave the numbers and the punctuation alone.
+   ============================================================ */
+
+/* The seven areas, one for each year code. */
+const ROOMS = {
+  0: { room: '',       shape: '' },
+  1: { room: '',       shape: '' },
+  2: { room: '',       shape: '' },
+  3: { room: 'Study',  shape: 'Door with a big comedy moustache' },
+  4: { room: '',       shape: '' },
+  5: { room: '',       shape: '' },
+  6: { room: '',       shape: '' }
+};
+
+/* The people, by two digit year. Add them as you go. */
+const PEOPLE = {
+  25: 'Billy Elliot'
+};
+
+/* Month prompts. These are placeholders, swap them for your own. */
+const MONTH_HINTS = [
+  'January, the first month',
+  'February, four beats in the word',
+  'March, in four four time',
+  'April Fool, you get a duck, zero',
+  'Mayday, mayday, always said twice',
+  'June, halfway through, hand up for five',
+  'July, the sun is a big zero in the sky',
+  'August, the third month of summer',
+  'September, sept is seven, one less is six',
+  'Octoberfest, Fest is like First',
+  'November, the night before Bonfire Night',
+  'December, the sixth is St Nicholas Day'
+];
+
+/* ============================================================
+   Below here is the machinery. No need to touch it.
+   ============================================================ */
 (function(){
   const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const MONTH_CODES = [1,4,4,0,2,5,0,3,6,1,4,6];
   const MIN = Date.UTC(1900,0,1);
   const MAX = Date.UTC(2099,11,31);
 
@@ -171,10 +247,16 @@
     next: document.getElementById('next'),
     streak: document.getElementById('streak'),
     tally: document.getElementById('tally'),
-    clock: document.getElementById('clock')
+    clock: document.getElementById('clock'),
+    workingLink: document.getElementById('workingLink'),
+    sheet: document.getElementById('sheet'),
+    sheetDate: document.getElementById('sheetDate'),
+    sheetDay: document.getElementById('sheetDay'),
+    steps: document.getElementById('steps'),
+    close: document.getElementById('close')
   };
 
-  let current = null, locked = false, started = 0, ticker = null;
+  let current = null, locked = false, started = 0, ticker = null, advance = null;
   let streak = 0, correct = 0, total = 0;
 
   const buttons = DAYS.map(function(name, i){
@@ -213,7 +295,125 @@
     return last === 1 ? 'st' : last === 2 ? 'nd' : last === 3 ? 'rd' : 'th';
   }
 
+  function isLeap(y){ return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0; }
+
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+
+  /* The working, exactly as you calculate it */
+  function working(d){
+    const day = d.getUTCDate();
+    const monthIndex = d.getUTCMonth();
+    const year = d.getUTCFullYear();
+    const yy = year % 100;
+
+    const dayCode = day % 7;
+    const sevens = Math.floor(day / 7);
+    const monthCode = MONTH_CODES[monthIndex];
+    const yearCode = (yy + Math.floor(yy / 4)) % 7;
+    const centuryCode = year < 2000 ? 0 : 6;
+    const leap = isLeap(year) && monthIndex < 2 ? -1 : 0;
+
+    const sum = dayCode + monthCode + yearCode + centuryCode + leap;
+    const finalCode = ((sum % 7) + 7) % 7;
+
+    return {
+      day: day, month: MONTHS[monthIndex], year: year, yy: yy,
+      dayCode: dayCode, sevens: sevens,
+      monthCode: monthCode, monthHint: MONTH_HINTS[monthIndex],
+      yearCode: yearCode, centuryCode: centuryCode,
+      leap: leap, sum: sum, finalCode: finalCode
+    };
+  }
+
+  /* Character pictures live in the people folder, named by two digit year,
+     for example people/25.png. Either .png or .jpg works, so a new picture
+     can just be dropped in as whichever it happens to be. */
+  const PICTURE_TYPES = ['png','jpg','jpeg'];
+
+  function addPortrait(step, yy){
+    const img = document.createElement('img');
+    let attempt = 0;
+    img.className = 'portrait';
+    img.alt = PEOPLE[yy] || 'Character for ' + pad(yy);
+    img.addEventListener('load', function(){ img.classList.add('loaded'); });
+    img.addEventListener('error', function(){
+      attempt++;
+      if(attempt < PICTURE_TYPES.length){
+        img.src = 'people/' + pad(yy) + '.' + PICTURE_TYPES[attempt];
+      } else {
+        img.remove();
+      }
+    });
+    img.src = 'people/' + pad(yy) + '.' + PICTURE_TYPES[0];
+    step.appendChild(img);
+  }
+
+  function row(code, head, hint, isTotal, pictureYear){
+    const div = document.createElement('div');
+    div.className = 'step' + (isTotal ? ' total' : '');
+    div.innerHTML =
+      '<div class="code">' + code + '</div>' +
+      '<div class="body"><div class="head">' + head + '</div>' +
+      (hint ? '<div class="hint">' + hint + '</div>' : '') + '</div>';
+    if(pictureYear !== undefined) addPortrait(div, pictureYear);
+    return div;
+  }
+
+  function buildSheet(){
+    const w = working(current);
+    el.sheetDate.textContent = w.day + suffix(w.day) + ' of ' + w.month + ' ' + w.year;
+    el.sheetDay.textContent = DAYS[current.getUTCDay()];
+    el.steps.innerHTML = '';
+
+    el.steps.appendChild(row(
+      w.dayCode, 'The day, ' + w.day,
+      w.sevens ? 'Cast out ' + w.sevens + ' seven' + (w.sevens > 1 ? 's' : '') + ', ' + (w.sevens * 7) + ', leaving ' + w.dayCode
+               : 'Under seven, so it stands as it is'
+    ));
+
+    el.steps.appendChild(row(w.monthCode, w.month, w.monthHint));
+
+    const place = ROOMS[w.yearCode] || {};
+    const who = PEOPLE[w.yy];
+    let hint = who ? who + ' is your ' + pad(w.yy) : 'Year ' + pad(w.yy) + ', name not added yet';
+    if(place.room){
+      hint += '. He is in the ' + place.room;
+      if(place.shape) hint += ', ' + place.shape.toLowerCase();
+      hint += ', which is ' + w.yearCode + '.';
+    } else {
+      hint += '. Room for ' + w.yearCode + ' not added yet.';
+    }
+    el.steps.appendChild(row(w.yearCode, 'The year, ' + pad(w.yy), hint, false, w.yy));
+
+    el.steps.appendChild(row(
+      w.centuryCode, w.year < 2000 ? 'The 1900s' : 'The 2000s',
+      w.year < 2000 ? 'Nothing to add for the last century' : 'Always add 6 for dates from 2000 onwards'
+    ));
+
+    if(w.leap){
+      el.steps.appendChild(row('-1', 'Leap year',
+        w.year + ' divides by 4, and the date falls in January or February, so take 1 off'));
+    }
+
+    el.steps.appendChild(row(
+      w.finalCode, 'Total ' + w.sum + ', giving ' + w.finalCode,
+      (w.sum >= 7 ? 'Cast out the sevens and you are left with ' + w.finalCode + '. ' : '') +
+      'Count 0 as Saturday, 1 as Sunday, and on. So ' + w.finalCode + ' is ' + DAYS[current.getUTCDay()] + '.',
+      true
+    ));
+  }
+
+  function openSheet(){
+    clearTimeout(advance);
+    buildSheet();
+    el.sheet.classList.add('show');
+    el.next.classList.add('show');
+  }
+
+  function closeSheet(){ el.sheet.classList.remove('show'); }
+
   function deal(){
+    closeSheet();
     current = new Date(MIN + Math.floor(Math.random() * (MAX - MIN + 1)));
     const d = current.getUTCDate();
     el.date.innerHTML =
@@ -222,8 +422,8 @@
       MONTHS[current.getUTCMonth()] + ' ' + current.getUTCFullYear();
 
     locked = false;
-    el.days.classList.remove('locked');
     el.next.classList.remove('show');
+    el.workingLink.classList.remove('show');
     el.verdict.className = 'verdict';
     el.answer.textContent = '';
     el.note.textContent = 'Which day was it?';
@@ -253,7 +453,6 @@
     el.tally.textContent = correct + '/' + total;
     el.clock.textContent = seconds + 's';
 
-    el.days.classList.add('locked');
     buttons.forEach(function(b){ b.disabled = true; });
     buttons[right].classList.add('correct');
     if(!won) button.classList.add('incorrect');
@@ -261,16 +460,19 @@
     el.verdict.className = 'verdict show ' + (won ? 'right' : 'wrong');
     el.answer.textContent = DAYS[right];
     el.note.textContent = won ? 'Correct in ' + seconds + 's' : 'Not quite';
+    el.workingLink.classList.add('show');
 
     if(won){
       chime();
-      setTimeout(deal, 1800);
+      advance = setTimeout(deal, 1800);
     } else {
       el.next.classList.add('show');
     }
   }
 
   el.next.addEventListener('click', deal);
+  el.workingLink.addEventListener('click', openSheet);
+  el.close.addEventListener('click', closeSheet);
   deal();
 })();
 </script>
