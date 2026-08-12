@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Almanac">
+<meta name="theme-color" content="#16182B">
+<title>Almanac</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --midnight:#16182B;
+    --slate:#232743;
+    --bone:#F2EDE4;
+    --brass:#C9A227;
+    --verdigris:#4FB49A;
+    --rust:#C05A4A;
+    --hairline:rgba(242,237,228,.14);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+
+  html,body{height:100%}
+
+  body{
+    background:var(--midnight);
+    color:var(--bone);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    display:flex;
+    justify-content:center;
+    overflow:hidden;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+
+  .app{
+    width:100%;
+    max-width:480px;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    padding:calc(env(safe-area-inset-top) + 18px) 20px calc(env(safe-area-inset-bottom) + 18px);
+    gap:14px;
+  }
+
+  /* header */
+  .masthead{display:flex;align-items:baseline;justify-content:space-between}
+  .wordmark{
+    font-size:.7rem;letter-spacing:.42em;text-transform:uppercase;
+    color:var(--brass);font-weight:600;
+  }
+  .tagline{font-size:.68rem;letter-spacing:.06em;opacity:.45}
+
+  /* scoreboard */
+  .scores{
+    display:flex;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);
+  }
+  .score{flex:1;padding:9px 0;text-align:center;border-right:1px solid var(--hairline)}
+  .score:last-child{border-right:0}
+  .score b{display:block;font-size:1.05rem;font-weight:500;font-variant-numeric:tabular-nums}
+  .score span{display:block;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;opacity:.45;margin-top:2px}
+
+  /* the date */
+  .stage{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;min-height:0;
+  }
+  .date{
+    font-family:"Fraunces","Georgia",serif;
+    font-weight:300;
+    font-size:clamp(2.1rem,10.5vw,3.3rem);
+    line-height:1.16;
+    letter-spacing:-.01em;
+  }
+  .date .day-num{font-weight:600}
+  .date .suffix{
+    font-size:.46em;vertical-align:.72em;color:var(--brass);
+    font-weight:600;margin-left:.02em;
+  }
+  .date .of{display:block;font-size:.38em;letter-spacing:.3em;text-transform:uppercase;
+    opacity:.4;font-family:"IBM Plex Sans",sans-serif;margin:.5em 0 .35em}
+
+  .verdict{
+    margin-top:26px;min-height:74px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:6px;
+  }
+  .verdict .answer{
+    font-family:"Fraunces",Georgia,serif;font-size:1.6rem;font-weight:600;
+    letter-spacing:.02em;opacity:0;transform:translateY(6px);
+    transition:opacity .18s ease,transform .18s ease;
+  }
+  .verdict .note{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.45}
+  .verdict.show .answer{opacity:1;transform:none}
+  .verdict.right .answer{color:var(--verdigris)}
+  .verdict.wrong .answer{color:var(--rust)}
+
+  /* day buttons */
+  .days{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .days button{
+    font-family:inherit;font-size:.96rem;font-weight:500;color:var(--bone);
+    background:var(--slate);border:1px solid transparent;border-radius:11px;
+    padding:15px 6px;cursor:pointer;
+    transition:background .12s ease,color .12s ease,border-color .12s ease;
+  }
+  .days button:nth-child(7){grid-column:span 2}
+  .days button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .days button:active{background:#2b3053}
+  .days button.correct{background:var(--verdigris);color:var(--midnight);font-weight:600}
+  .days button.incorrect{background:var(--rust);color:var(--bone)}
+  .days.locked button{cursor:default}
+
+  .next{
+    display:none;width:100%;font-family:inherit;font-size:.78rem;font-weight:600;
+    letter-spacing:.18em;text-transform:uppercase;
+    background:transparent;color:var(--brass);border:1px solid var(--brass);
+    border-radius:11px;padding:14px;cursor:pointer;
+  }
+  .next.show{display:block}
+  .next:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="masthead">
+    <span class="wordmark">Almanac</span>
+    <span class="tagline">1900 to 2099</span>
+  </header>
+
+  <section class="scores">
+    <div class="score"><b id="streak">0</b><span>Streak</span></div>
+    <div class="score"><b id="tally">0/0</b><span>Correct</span></div>
+    <div class="score"><b id="clock">0.0s</b><span>Time</span></div>
+  </section>
+
+  <main class="stage">
+    <p class="date" id="date"></p>
+    <div class="verdict" id="verdict">
+      <span class="answer" id="answer"></span>
+      <span class="note" id="note">Which day was it?</span>
+    </div>
+  </main>
+
+  <div class="days" id="days"></div>
+  <button class="next" id="next">Next date</button>
+
+</div>
+
+<script>
+(function(){
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const MIN = Date.UTC(1900,0,1);
+  const MAX = Date.UTC(2099,11,31);
+
+  const el = {
+    date: document.getElementById('date'),
+    verdict: document.getElementById('verdict'),
+    answer: document.getElementById('answer'),
+    note: document.getElementById('note'),
+    days: document.getElementById('days'),
+    next: document.getElementById('next'),
+    streak: document.getElementById('streak'),
+    tally: document.getElementById('tally'),
+    clock: document.getElementById('clock')
+  };
+
+  let current = null, locked = false, started = 0, ticker = null;
+  let streak = 0, correct = 0, total = 0;
+
+  const buttons = DAYS.map(function(name, i){
+    const b = document.createElement('button');
+    b.textContent = name;
+    b.addEventListener('click', function(){ answer(i, b); });
+    el.days.appendChild(b);
+    return b;
+  });
+
+  let audio = null;
+  function chime(){
+    try{
+      if(!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+      if(audio.state === 'suspended') audio.resume();
+      const now = audio.currentTime;
+      [[880, 0], [1318.51, 0.1]].forEach(function(note){
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = note[0];
+        gain.gain.setValueAtTime(0.0001, now + note[1]);
+        gain.gain.linearRampToValueAtTime(0.25, now + note[1] + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + note[1] + 0.45);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(now + note[1]);
+        osc.stop(now + note[1] + 0.5);
+      });
+    }catch(e){}
+  }
+
+  function suffix(n){
+    if(n > 3 && n < 21) return 'th';
+    const last = n % 10;
+    return last === 1 ? 'st' : last === 2 ? 'nd' : last === 3 ? 'rd' : 'th';
+  }
+
+  function deal(){
+    current = new Date(MIN + Math.floor(Math.random() * (MAX - MIN + 1)));
+    const d = current.getUTCDate();
+    el.date.innerHTML =
+      '<span class="day-num">' + d + '</span><span class="suffix">' + suffix(d) + '</span>' +
+      '<span class="of">of</span>' +
+      MONTHS[current.getUTCMonth()] + ' ' + current.getUTCFullYear();
+
+    locked = false;
+    el.days.classList.remove('locked');
+    el.next.classList.remove('show');
+    el.verdict.className = 'verdict';
+    el.answer.textContent = '';
+    el.note.textContent = 'Which day was it?';
+    buttons.forEach(function(b){ b.className = ''; b.disabled = false; });
+
+    started = Date.now();
+    clearInterval(ticker);
+    ticker = setInterval(tick, 100);
+    tick();
+  }
+
+  function tick(){
+    el.clock.textContent = ((Date.now() - started) / 1000).toFixed(1) + 's';
+  }
+
+  function answer(index, button){
+    if(locked) return;
+    locked = true;
+    clearInterval(ticker);
+    const seconds = ((Date.now() - started) / 1000).toFixed(1);
+    const right = current.getUTCDay();
+    const won = index === right;
+
+    total++;
+    if(won){ correct++; streak++; } else { streak = 0; }
+    el.streak.textContent = streak;
+    el.tally.textContent = correct + '/' + total;
+    el.clock.textContent = seconds + 's';
+
+    el.days.classList.add('locked');
+    buttons.forEach(function(b){ b.disabled = true; });
+    buttons[right].classList.add('correct');
+    if(!won) button.classList.add('incorrect');
+
+    el.verdict.className = 'verdict show ' + (won ? 'right' : 'wrong');
+    el.answer.textContent = DAYS[right];
+    el.note.textContent = won ? 'Correct in ' + seconds + 's' : 'Not quite';
+
+    if(won){
+      chime();
+      setTimeout(deal, 1800);
+    } else {
+      el.next.classList.add('show');
+    }
+  }
+
+  el.next.addEventListener('click', deal);
+  deal();
+})();
+</script>
+</body>
+</html>
